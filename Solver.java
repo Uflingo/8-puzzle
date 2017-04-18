@@ -1,41 +1,61 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.*;
 
 
 public class Solver {
     private int moves, minMoves;
     private Stack<Board> stack;
+    private boolean isSolv;
     public Solver(Board initial) {           // find a solution to the initial board (using the A* algorithm)
         if (initial== null)
             throw new java.lang.NullPointerException();
+        isSolv = true;
         moves = 0;
         Node node = new Node(initial, null,0);
+        Node twinNode = new Node(initial.twin(),null,0);
         MinPQ<Node> queue = new MinPQ<>();
-        while (!node.cur.isGoal()){
+        MinPQ<Node> twinQueue = new MinPQ<>();
+        while ((!node.board.isGoal()) && (!twinNode.board.isGoal()) ){
             moves++;
-            for (Board it: node.cur.neighbors()){
-                queue.insert(new Node(it,node,moves));
+            for (Board it: node.board.neighbors()){
+                if ((node.prev == null) || (!it.equals(node.prev.board)))
+                    queue.insert(new Node(it,node,moves));
             }
             node = queue.delMin();
+
+            for (Board it: twinNode.board.neighbors()){
+                if ((twinNode.prev == null) || (!it.equals(twinNode.prev.board)))
+                    twinQueue.insert(new Node(it,twinNode,moves));
+            }
+            twinNode = twinQueue.delMin();
         }
-        stack = new Stack<>();
-        Node c = node;
-        minMoves = c.steps;
-        while (c != null){
-            stack.add(c.cur);
-            c = c.prev;
+        if(twinNode.board.isGoal()){
+            minMoves = -1;
+            isSolv = false;
+            stack = null;
+        }
+        else {
+            stack = new Stack<>();
+            Node c = node;
+            minMoves = 0;
+            while (c != null) {
+                stack.push(c.board);
+                c = c.prev;
+                minMoves++;
+            }
+            minMoves--;
         }
     }
     private class Node implements Comparable{
-        private Board cur;
+        private Board board;
         private int steps;
         private Node prev;
 
         public Node(Board cur, Node prev, int steps) {
-            this.cur = cur;
+            this.board = cur;
             this.prev = prev;
             this.steps = steps;
         }
@@ -45,11 +65,11 @@ public class Solver {
             if (!(o instanceof Node))
                 throw new RuntimeException("Wrong type of compared objects");
             Node compWith = (Node) o;
-            return  (this.cur.manhattan() + this.steps) - (compWith.cur.manhattan() + compWith.steps);
+            return  (this.board.manhattan() + this.steps) - (compWith.board.manhattan() + compWith.steps);
         }
     }
     public boolean isSolvable() {            // is the initial board solvable?
-        return true;
+        return isSolv;
     }
     public int moves() {                     // min number of moves to solve initial board; -1 if unsolvable
         return minMoves;
