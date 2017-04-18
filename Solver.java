@@ -2,48 +2,60 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 
 public class Solver {
-    private int moves;
-    private List<Board> gameTree;
+    private int moves, minMoves;
+    private Stack<Board> stack;
     public Solver(Board initial) {           // find a solution to the initial board (using the A* algorithm)
         if (initial== null)
             throw new java.lang.NullPointerException();
         moves = 0;
-        gameTree = new ArrayList<>();
-        MinPQ<Board> queue =  new MinPQ<>(new ManhattanOrder());
-        Board cur = initial;
-        gameTree.add(cur);
-        Board prev = initial;
-        while (!cur.isGoal()){
-            for(Board it: cur.neighbors()){
-                if (!prev.equals(it))
-                    queue.insert(it);
-            }
-            prev = cur;
+        Node node = new Node(initial, null,0);
+        MinPQ<Node> queue = new MinPQ<>();
+        while (!node.cur.isGoal()){
             moves++;
-            cur = queue.delMin();
-            gameTree.add(cur);
+            for (Board it: node.cur.neighbors()){
+                queue.insert(new Node(it,node,moves));
+            }
+            node = queue.delMin();
+        }
+        stack = new Stack<>();
+        Node c = node;
+        minMoves = c.steps;
+        while (c != null){
+            stack.add(c.cur);
+            c = c.prev;
+        }
+    }
+    private class Node implements Comparable{
+        private Board cur;
+        private int steps;
+        private Node prev;
+
+        public Node(Board cur, Node prev, int steps) {
+            this.cur = cur;
+            this.prev = prev;
+            this.steps = steps;
         }
 
+        @Override
+        public int compareTo(Object o) {
+            if (!(o instanceof Node))
+                throw new RuntimeException("Wrong type of compared objects");
+            Node compWith = (Node) o;
+            return  (this.cur.manhattan() + this.steps) - (compWith.cur.manhattan() + compWith.steps);
+        }
     }
     public boolean isSolvable() {            // is the initial board solvable?
         return true;
     }
     public int moves() {                     // min number of moves to solve initial board; -1 if unsolvable
-        return moves;
+        return minMoves;
     }
     public Iterable<Board> solution() {      // sequence of boards in a shortest solution; null if unsolvable
-        return gameTree;
-    }
-    private class ManhattanOrder implements Comparator<Board>{
-        public int compare(Board a, Board b){
-            return b.manhattan() - a.manhattan();
-        }
+        return stack;
     }
     public static void main(String[] args) { // solve a slider puzzle (given below)
         // create initial board from file
