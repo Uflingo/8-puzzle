@@ -49,7 +49,7 @@ public class Solver {
             minMoves--;
         }
     }
-    private class Node implements Comparable{
+    private class Node implements Comparable<Node>{
         private Board board;
         private int steps;
         private Node prev;
@@ -61,11 +61,8 @@ public class Solver {
         }
 
         @Override
-        public int compareTo(Object o) {
-            if (!(o instanceof Node))
-                throw new RuntimeException("Wrong type of compared objects");
-            Node compWith = (Node) o;
-            return  (this.board.manhattan() + this.steps) - (compWith.board.manhattan() + compWith.steps);
+        public int compareTo(Node o) {
+            return  (this.board.manhattan() + this.steps) - (o.board.manhattan() + o.steps);
         }
     }
     public boolean isSolvable() {            // is the initial board solvable?

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.Math.abs;
@@ -44,7 +45,7 @@ public class Board {
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 if (blocks[i][j] != 0){
-                    counter += abs(i-blocks[i][j]/dim) + abs(j - (blocks[i][j]-1)%dim);
+                    counter += abs(i-(blocks[i][j]-1)/dim) + abs(j - (blocks[i][j]-1)%dim);
                 }
             }
         }
@@ -65,18 +66,32 @@ public class Board {
         exchange(twin,i1,j1,i2,j2);
         return new Board(twin);
     }
-    public boolean equals(Object y) {        // does this board equal y?
-        if (!(y instanceof Board))
-            return false;
-        Board t = (Board) y;
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                if (this.blocks[i][j] != t.blocks[i][j])
-                    return false;
-            }
-        }
-        return true;
+//    public boolean equals(Object y) {        // does this board equal y?
+//        if (!(y instanceof Board))
+//            return false;
+//        Board t = (Board) y;
+//        for (int i = 0; i < dim; i++) {
+//            for (int j = 0; j < dim; j++) {
+//                if (this.blocks[i][j] != t.blocks[i][j])
+//                    return false;
+//            }
+//        }
+//        return true;
+//    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Board board = (Board) o;
+
+        if (dim != board.dim) return false;
+        return Arrays.deepEquals(blocks, board.blocks);
+
     }
+
     private void exchange(int[][] arr, int i1, int j1, int i2, int j2){
         int buf = arr[i1][j1];
         arr[i1][j1] = arr[i2][j2];
@@ -130,12 +145,10 @@ public class Board {
     }
 
     public static void main(String[] args) { // unit tests (not graded)
-        int[][] a = {{0,1,3},{4,8,2},{7,6,5}};
+        int[][] a = {{1,2,3},{0,7,6},{5,4,8}};
 
         Board b = new Board(a);
-        System.out.println(b);
-        for(Board it: b.neighbors()){
-            System.out.println(it);
-        }
+        System.out.println(b.manhattan());
+
     }
 }
