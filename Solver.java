@@ -6,29 +6,28 @@ import edu.princeton.cs.algs4.StdOut;
 
 
 public class Solver {
-    private int moves, minMoves;
+    private int minMoves;
     private Stack<Board> stack;
     private boolean isSolv;
     public Solver(Board initial) {           // find a solution to the initial board (using the A* algorithm)
         if (initial== null)
             throw new java.lang.NullPointerException();
         isSolv = true;
-        moves = 0;
         Node node = new Node(initial, null,0);
         Node twinNode = new Node(initial.twin(),null,0);
         MinPQ<Node> queue = new MinPQ<>();
         MinPQ<Node> twinQueue = new MinPQ<>();
         while ((!node.board.isGoal()) && (!twinNode.board.isGoal()) ){
-            moves++;
+
             for (Board it: node.board.neighbors()){
                 if ((node.prev == null) || (!it.equals(node.prev.board)))
-                    queue.insert(new Node(it,node,moves));
+                    queue.insert(new Node(it,node,node.steps+1));
             }
             node = queue.delMin();
 
             for (Board it: twinNode.board.neighbors()){
                 if ((twinNode.prev == null) || (!it.equals(twinNode.prev.board)))
-                    twinQueue.insert(new Node(it,twinNode,moves));
+                    twinQueue.insert(new Node(it,twinNode,twinNode.steps+1));
             }
             twinNode = twinQueue.delMin();
         }
